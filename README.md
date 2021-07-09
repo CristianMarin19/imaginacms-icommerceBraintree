@@ -31,3 +31,39 @@ Account: https://www.braintreepayments.com/sandbox
 
 ## Documentation SDK
 PHP: https://developer.paypal.com/braintree/docs/start/hello-server/php
+
+## API
+
+### * Get Client Token
+```GET``` ```/api/icommercebraintree/get-client-token```
+##### Response:
+``` 
+data:
+ -Token
+```
+### * Process Payment
+```POST``` ```/api/icommercebraintree/process-payment```
+##### Data:
+```
+attributes:
+ - orderId
+ - clientNonce
+ ```
+##### Response:
+``` 
+data:
+ - success (true or false)
+ - transaction
+```
+### * Find Transaction
+```GET``` ```/api/icommercebraintree/find-transaction/{id}```
+##### Data:
+```
+- id (Braintree Transaction Id)
+ ```
+##### Response:
+``` 
+data:
+ -transaction
+```
+
