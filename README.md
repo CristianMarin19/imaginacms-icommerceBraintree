@@ -27,7 +27,7 @@ php artisan module:seed Icommercebraintree
     - Mode (sandbox or production)
 
 ## Sandbox
-	[Account](https://www.braintreepayments.com/sandbox).
+Account: https://www.braintreepayments.com/sandbox
 
 ## Documentation SDK
-	[PHP SDK](https://developer.paypal.com/braintree/docs/start/hello-server/php).
+PHP: https://developer.paypal.com/braintree/docs/start/hello-server/php
