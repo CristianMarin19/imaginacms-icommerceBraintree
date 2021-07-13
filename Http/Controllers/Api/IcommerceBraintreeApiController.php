@@ -163,28 +163,38 @@ class IcommerceBraintreeApiController extends BaseApiController
             \Log::info('Icommercebraintree: processPayment - OrderID: '.$order->id);
             \Log::info('Icommercebraintree: processPayment - TransactionID: '.$transactionId);
 
-            // Transaction Braintree
-            $result = $this->braintreeApi->createTransaction($order,$data['clientNonce']);
-
             // Braintree Service
             $braintreeService = app("Modules\Icommercebraintree\Services\BraintreeService");
 
+            $type = 1; //Transaction
+
+            //Suscription Braintree
+            if(isset($data['planId']) && !empty($data['planId'])){
+                $result= $this->braintreeApi->createSuscription($order,$data['planId'],$data['clientNonce']);
+                $type = 2;
+            }else{
+
+            //Transaction Braintree
+                $result = $this->braintreeApi->createTransaction($order,$data['clientNonce']);   
+            }
+
             // Success Response
-            if($result->success || !is_null($result->transaction)) {
+            if($result->success) {
                 
-                $transactionBraintree = $result->transaction;
+                // Transaction
+                if($type==1)
+                    $transactionBraintree = $result->transaction;
+                else
+                    $transactionBraintree = $result->subscription->transactions[0];
 
                 // Get Status Order
                 $newStatusOrder = $braintreeService->getStatusOrder($transactionBraintree->status);
 
                 // Update Order and Transaction
-                // External Code = Braintree Transaction ID
-                $this->updateInformation($order->id,$transactionId,$newStatusOrder,$transactionBraintree->status,$transactionBraintree->id);
+                $this->updateInformation($order->id,$transactionId,$newStatusOrder,$transactionBraintree);
 
                 // Response Result Transaction Braintree
                 $response = [ 'data' => $result ];
-
-
 
             }else{
 
@@ -195,8 +205,7 @@ class IcommerceBraintreeApiController extends BaseApiController
                 $errors = $braintreeService->getErrors($result->errors->deepAll());
                 
                 // Update Order and Transaction
-                // External Code = Error Code
-                $this->updateInformation($order->id,$transactionId,$newStatusOrder,$errors['msj'],$errors['code']);
+                $this->updateInformation($order->id,$transactionId,$newStatusOrder,null,$errors);
 
                 throw new \Exception($errors['string'], 204);
 
@@ -246,7 +255,16 @@ class IcommerceBraintreeApiController extends BaseApiController
     /**
     * Update Information (Order and Transaction)
     */
-    public function updateInformation($orderId,$transactionId,$newStatusOrder,$externalStatus="",$externalCode=""){
+    public function updateInformation($orderId,$transactionId,$newStatusOrder,
+        $transactionBraintree=null,$errors=null){
+
+        if(is_null($transactionBraintree)){
+            $externalStatus = $errors['msj'];
+            $externalCode = $errors['code'];
+        }else{
+            $externalStatus = $transactionBraintree->status;
+            $externalCode = $transactionBraintree->id;
+        }
 
         // Update Transaction
         $transaction = $this->validateResponseApi(
@@ -257,11 +275,19 @@ class IcommerceBraintreeApiController extends BaseApiController
             ]))
         );
 
+       
+        $suscriptionId = null;
+        if(isset($transactionBraintree->subscriptionId)){
+            $suscriptionId = $transactionBraintree->subscriptionId;
+            \Log::info('Module Icommercebraintree: SuscriptionId: '.$suscriptionId);
+        }
+
         // Update Order Process
         $orderUP = $this->validateResponseApi(
             $this->orderController->update($orderId,new Request(
                 ["attributes" =>[
-                    'status_id' => $newStatusOrder
+                    'status_id' => $newStatusOrder,
+                    'suscription_id' => $suscriptionId
                 ]
             ]))
         );
