@@ -2,7 +2,7 @@
 
 ## Install
 ```bash
-composer require imagina/icredit-module=v8.x-dev
+composer require imagina/icommercebraintree-module=v8.x-dev
 ```
 
 ```bash
