@@ -49,6 +49,7 @@ attributes:
  - orderId
  - clientNonce
  - planId (Optional) - Suscriptions
+ - planPrice (Optional) - Suscriptions (Override Plan Price)
  ```
 ##### Response:
 ``` 

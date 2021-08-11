@@ -160,9 +160,17 @@ class BraintreeApiController extends BaseApiController
     * @param 
     * @return
     */
-    public function createSuscription($order,$planId,$nonceFromTheClient){
+    public function createSuscription($order,$data){
         
         
+        $planId = $data['planId'];
+        $nonceFromTheClient = $data['clientNonce'];
+        $planPrice = null;
+
+        if(isset($data['planPrice']))
+            $planPrice = $data['planPrice'];
+        
+
         $customer = $this->findCustomer($order->customer_id); 
 
         // Customer Exist
@@ -173,18 +181,22 @@ class BraintreeApiController extends BaseApiController
 
             if($createdPaymentMethod->success){
 
-                // Get Payment Method Token
+                // Get NEW Payment Method Token
                 $newPaymentMethodToken = $createdPaymentMethod->paymentMethod->token;
 
+                // Get Data to Suscription
+                $dataSubscription = $this->braintreeService->getDataToSuscription($newPaymentMethodToken,$planId,$planPrice);
+
                 // Add Suscription
-                $result = $this->gateway->subscription()->create([
-                    'paymentMethodToken' => $newPaymentMethodToken,
-                    'planId' => $planId
-                ]);
+                $result = $this->gateway->subscription()->create($dataSubscription);
 
             }else{
 
+                $errors = $this->braintreeService->getErrors($createdPaymentMethod->errors->deepAll());
+
                 \Log::error('Icommercebraintree: Braintree API - Create suscription - createdPaymentMethod');
+
+                throw new \Exception($errors['string'], 204); 
 
             }     
            
@@ -198,11 +210,11 @@ class BraintreeApiController extends BaseApiController
                 // Get Payment Method Token
                 $paymentToken = $createdCustomer->customer->paymentMethods[0]->token;
 
+                // Get Data to Suscription
+                $dataSubscription = $this->braintreeService->getDataToSuscription($paymentToken,$planId,$planPrice);
+
                 // Add Suscription
-                $result = $this->gateway->subscription()->create([
-                    'paymentMethodToken' => $paymentToken,
-                    'planId' => $planId
-                ]);
+                $result = $this->gateway->subscription()->create($dataSubscription);
 
             }else{
 

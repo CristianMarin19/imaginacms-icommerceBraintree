@@ -170,7 +170,7 @@ class IcommerceBraintreeApiController extends BaseApiController
 
             //Suscription Braintree
             if(isset($data['planId']) && !empty($data['planId'])){
-                $result= $this->braintreeApi->createSuscription($order,$data['planId'],$data['clientNonce']);
+                $result= $this->braintreeApi->createSuscription($order,$data);
                 $type = 2;
             }else{
 

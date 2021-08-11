@@ -90,4 +90,24 @@ class BraintreeService
 
     }
 
+    /**
+    * Get Data
+    * @param
+    * @return Array
+    */
+    public function getDataToSuscription($token,$planId,$planPrice){
+
+
+        $dataSubscription = [
+            'paymentMethodToken' => $token,
+            'planId' => $planId,
+        ];
+
+        // Check to override plan price
+        if(!is_null($planPrice))
+            $dataSubscription['price'] = $planPrice;
+
+        return $dataSubscription;
+    }
+
 }
