@@ -42,7 +42,7 @@ class IcommercebraintreeServiceProvider extends ServiceProvider
         $this->publishConfig('icommercebraintree', 'config');
         $this->publishConfig('icommercebraintree', 'crud-fields');
 
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        //$this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
     }
 
     /**
