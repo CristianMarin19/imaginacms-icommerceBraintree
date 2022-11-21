@@ -18,7 +18,7 @@ class IcommercebraintreeDatabaseSeeder extends Seeder
         
         Model::unguard();
 
-
+        $this->call(IcommercebraintreeModuleTableSeeder::class);
         $name = config('asgard.icommercebraintree.config.paymentName');
         $result = PaymentMethod::where('name',$name)->first();
 
